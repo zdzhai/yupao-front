@@ -17,11 +17,6 @@
             type="textarea"
             placeholder="请输入队伍描述"
         />
-        <van-field name="stepper" label="队伍人数">
-          <template #input>
-            <van-stepper v-model="addTeamData.maxNum" max="10" min="3"/>
-          </template>
-        </van-field>
         <van-field name="radio" label="队伍状态">
           <template #input>
             <van-radio-group v-model="addTeamData.status" direction="horizontal">
@@ -56,16 +51,20 @@
         </van-button>
       </div>
     </van-form>
-  </div>
+  </div>>
+
 </template>
 
 <script setup>
 import {useRouter} from "vue-router";
-import {ref} from 'vue';
+import {useRoute} from "vue-router";
+import {onMounted, ref} from 'vue';
 import myAxios from "../plugins/myAxios.js";
 import {Toast} from "vant";
 
 const router = useRouter();
+const route = useRoute();
+
 const initFormData = {
   "name": "",
   "description": "",
@@ -81,21 +80,41 @@ const onConfirm = (date) => {
   result.value = `${date.getMonth() + 1}/${date.getDate()}`;
   showCalendar.value = false;
 }
-
+/**
+ * 前端页面之间传递参数
+ * @type {string | LocationQueryValue[]}
+ */
+const id = route.query.id;
+onMounted(async () =>{
+  if (id < 0){
+    return;
+  }
+  const res = await myAxios.get("/team/get",{
+    params: {
+      id: id,
+    }
+  });
+  if (res.data?.code === 0){
+    addTeamData.value = res.data.data;
+  } else {
+    console.log("队伍加载失败，请刷新重试！")
+  }
+});
 const onSubmit = async () => {
   const postData = {
     ...addTeamData.value,
     status: Number(addTeamData.value.status)
   }
   //todo 前端参数校验
-  const res = await myAxios.post('/team/add', postData);
+  const res = await myAxios.post('/team/update', postData);
   if (res.data.code === 0 && res.data.data) {
+    console.log('更新成功');
     router.push({
       path: '/team',
       replace: true,
     });
   } else {
-    Toast.fail("登录失败");
+    console.log("更新失败");
   }
 }
 </script>

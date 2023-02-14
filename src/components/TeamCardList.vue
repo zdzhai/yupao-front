@@ -25,6 +25,9 @@
       </template>
       <template #footer>
         <van-button type="primary" plain size="small" @click="doJoinTeam(team.id)">加入队伍</van-button>
+        <van-button v-if="team.userId === currentUser?.id" plain size="small" @click="doUpdateTeam(team.id)">更新队伍</van-button>
+        <van-button  plain size="small" @click="doQuitTeam(team.id)">退出队伍</van-button>
+        <van-button v-if="team.userId === currentUser?.id" plain size="small" @click="doDeleteTeam(team.id)">解散队伍</van-button>
       </template>
     </van-card>
   </div>
@@ -35,6 +38,11 @@ import {TeamType} from "../moduls/team";
 import {teamStatusEnum} from "../constants/teamEnum";
 import png from '../assets/vue.svg';
 import myAxios from "../plugins/myAxios.js";
+import {useRouter} from "vue-router";
+import {onMounted, ref} from "vue";
+import {getCurrentUser} from "../services/user";
+
+const router = useRouter();
 
 interface TeamCardListProps{
   teamList : TeamType[];
@@ -55,6 +63,60 @@ const doJoinTeam = async (id: number) => {
       })
   if (res.data == 0) {
     console.log(res);
+  }
+}
+
+const currentUser = ref({})
+/*
+页面加载时获取当前用户
+ */
+onMounted(async () => {
+   currentUser.value = await getCurrentUser();
+})
+/**
+ * 跳转至更新队伍页
+ * @param id
+ */
+const doUpdateTeam =  (id: number) => {
+ router.push({
+   path: '/team/update',
+   query: {
+     id,
+   }
+ })
+}
+/**
+ * 退出队伍
+ * @param id
+ */
+const doQuitTeam = async (id: number) => {
+  const res = await myAxios.post('/team/quit',{
+    teamId: id,
+  }).finally((response) =>{
+    return response?.data;
+  })
+  if (res?.code === 0){
+    console.log('操作成功');
+  } else {
+    console.log('操作失败' + (res.description ? `，${res.description}`:''));
+
+  }
+}
+/**
+ * 解散队伍
+ * @param id
+ */
+const doDeleteTeam = async (id: number) => {
+  const res = await myAxios.post('/team/delete',{
+    teamId: id,
+  }).finally((response) =>{
+    return response?.data;
+  })
+  if (res?.code === 0){
+    console.log('操作成功');
+  } else {
+    console.log('操作失败' + (res.description ? `，${res.description}`:''));
+
   }
 }
 </script>
