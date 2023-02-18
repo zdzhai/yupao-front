@@ -1,5 +1,6 @@
 import axios from "axios";
 import qs from "qs";
+import {ref} from "vue";
 
 // Set config defaults when creating the instance
 const myAxios = axios.create({
@@ -28,6 +29,13 @@ myAxios.interceptors.request.use(function (config) {
 // Add a response interceptor
 myAxios.interceptors.response.use(function (response) {
     // Do something with response data
+    console.log("我收到响应啦");
+    //未登录则跳转到登录页面
+    if (response?.data?.code === 40100 ){
+        //先记录跳转前的页面
+        const redirectUrl = window.location.href;
+        window.location.href = `/user/login?redirect=${redirectUrl}`;
+    }
     return response;
 }, function (error) {
     // Do something with response error

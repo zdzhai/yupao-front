@@ -24,9 +24,12 @@
         </div>
       </template>
       <template #footer>
-        <van-button type="primary" plain size="small" @click="doJoinTeam(team.id)">加入队伍</van-button>
+        <van-button type="primary" plain size="small" v-if="team.userId !== currentUser?.id && !team.hasJoin"
+                    @click="doJoinTeam(team.id)">
+          加入队伍</van-button>
         <van-button v-if="team.userId === currentUser?.id" plain size="small" @click="doUpdateTeam(team.id)">更新队伍</van-button>
-        <van-button  plain size="small" @click="doQuitTeam(team.id)">退出队伍</van-button>
+        <van-button  plain size="small" v-if="team.userId !== currentUser?.id && team.hasJoin"
+                     @click="doQuitTeam(team.id)">退出队伍</van-button>
         <van-button v-if="team.userId === currentUser?.id" plain size="small" @click="doDeleteTeam(team.id)">解散队伍</van-button>
       </template>
     </van-card>
@@ -39,10 +42,12 @@ import {teamStatusEnum} from "../constants/teamEnum";
 import png from '../assets/vue.svg';
 import myAxios from "../plugins/myAxios.js";
 import {useRouter} from "vue-router";
+import {useRoute} from "vue-router";
 import {onMounted, ref} from "vue";
 import {getCurrentUser} from "../services/user";
 
 const router = useRouter();
+const route = useRoute();
 
 interface TeamCardListProps{
   teamList : TeamType[];
@@ -95,8 +100,9 @@ const doQuitTeam = async (id: number) => {
   }).finally((response) =>{
     return response?.data;
   })
-  if (res?.code === 0){
+  if (res.data?.code === 0){
     console.log('操作成功');
+    location.reload();
   } else {
     console.log('操作失败' + (res.description ? `，${res.description}`:''));
 
@@ -108,12 +114,13 @@ const doQuitTeam = async (id: number) => {
  */
 const doDeleteTeam = async (id: number) => {
   const res = await myAxios.post('/team/delete',{
-    teamId: id,
+    id: id,
   }).finally((response) =>{
     return response?.data;
   })
-  if (res?.code === 0){
+  if (res.data?.code === 0){
     console.log('操作成功');
+    location.reload();
   } else {
     console.log('操作失败' + (res.description ? `，${res.description}`:''));
 
