@@ -27,7 +27,7 @@ import {Toast} from "vant";
 import {getCurrentUser} from "../services/user";
 
 const user = ref();
-//todo 钩子函数就是每次加载页面会执行的操作
+//钩子函数就是每次加载页面会执行的操作
 onMounted(async () => {
   const currentUser = await getCurrentUser();
   console.log('当前用户'+currentUser.userAccount);

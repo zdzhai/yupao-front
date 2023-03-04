@@ -1,3 +1,15 @@
 #content{
     padding-bottom: 50px;
 }
+.add-button {
+    right: 12px;
+    bottom: 50px;
+    position: fixed;
+    width: 45px;
+    height: 45px;
+    border-radius: 80%;
+    z-index: 5;
+}
+.avatarStyle {
+    text-align: center
+}

@@ -1,6 +1,6 @@
 <template>
   <van-nav-bar
-      title="标题"
+      :title="title"
       left-arrow
       @click-left="onClickLeft"
       @click-right="onClickRight"
@@ -45,19 +45,31 @@
 
 <!--setup是vue3的语法糖，可以直接将变量暴露给页面-->
 <script setup lang="ts">
-import {useRouter} from "vue-router";
-  const router = useRouter();
+import {useRoute, useRouter} from "vue-router";
+import routes from "../config/route";
+import {ref} from "vue";
+
+const router = useRouter();
+  const route = useRoute();
 
 const onClickLeft = () =>
     router.back();
 const onClickRight = () =>
     router.push('./search');
 
-// const active = ref("index");
-const onChange =  (index : string) =>
-  console.log(`标签 ${index}`);
 // Toast(`标签 ${index}`);
-
+const DEFAULT_TITLE = '伙伴匹配';
+const title = ref(DEFAULT_TITLE);
+/**
+ * 根据路由切换标题
+ */
+const changeTitle = router.beforeEach((to,from) => {
+  const toPath = to.path;
+  const route = routes.find((route) => {
+    return  toPath == route.path;
+  })
+  title.value = route?.title ?? DEFAULT_TITLE;
+})
 </script>
 
 <style scoped>

@@ -41,7 +41,7 @@ console.log(route.query);
   const onSubmit = async () => {
     const currentUser = await getCurrentUser();
     if (!currentUser){
-      Toast.fail('用户未登录');
+      console.log('用户未登录');
       return;
     }
     const res =  await myAxios.post("/user/update",{
@@ -55,7 +55,7 @@ console.log(route.query);
       Toast.success("修改成功");
 
     } else {
-      Toast.fail("修改失败");
+      console.log("修改失败");
     }
   };
 

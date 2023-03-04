@@ -42,13 +42,20 @@
         <van-field
             v-model="addTeamData.expireTime"
             is-link
-            readonly
-            name="calendar"
+            readonlys
+            name="datePicker"
             label="过期时间"
-            placeholder="点击选择日期"
-            @click="showCalendar = true"
+            placeholder="点击选择时间"
+            @click="showPicker = true"
         />
-        <van-calendar v-model:show="showCalendar" @confirm="onConfirm" />
+        <van-popup v-show="showPicker" position="bottom">
+          <van-date-picker
+              @confirm="onConfirm"
+              @cancel="showPicker = false"
+              :min-date="minDate"
+              title="请选择时间"/>
+<!--          <van-calendar v-model:show="showPicker" @confirm="onConfirm" />-->
+        </van-popup>
       </van-cell-group>
       <div style="margin: 16px;">
         <van-button round block type="primary" native-type="submit">
@@ -64,28 +71,32 @@ import {useRouter} from "vue-router";
 import {ref} from 'vue';
 import myAxios from "../plugins/myAxios.js";
 import {Toast} from "vant";
+import moment from "moment";
 
 const router = useRouter();
+
+const minDate = new Date();
 const initFormData = {
   "name": "",
   "description": "",
-  "expireTime": new Date(2024, 1, 1).getTime(),
+  "expireTime": '',
   "maxNum": 3,
   "password": "",
   "status": 0
 }
 const addTeamData = ref({...initFormData});
-const result = ref('');
-const showCalendar = ref(false);
-const onConfirm = (date) => {
-  result.value = `${date.getMonth() + 1}/${date.getDate()}`;
-  showCalendar.value = false;
+const showPicker = ref(false);
+
+const onConfirm = ({ selectedValues }) => {
+  addTeamData.value.expireTime = selectedValues.join('-');
+  showPicker.value = false;
 }
 
 const onSubmit = async () => {
   const postData = {
     ...addTeamData.value,
-    status: Number(addTeamData.value.status)
+    status: Number(addTeamData.value.status),
+    expireTime: moment(addTeamData.value.expireTime).format("YYYY-MM-DD HH:mm:ss")
   }
   //todo 前端参数校验
   const res = await myAxios.post('/team/add', postData);
@@ -95,7 +106,7 @@ const onSubmit = async () => {
       replace: true,
     });
   } else {
-    Toast.fail("登录失败");
+    console.log("登录失败");
   }
 }
 </script>

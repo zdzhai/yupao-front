@@ -1,8 +1,8 @@
 <template>
   <div id="teamPage">
     <van-search v-model="searchText" show-action placeholder="搜索队伍" @search="onSearch"/>
-    <van-button type="primary" @click="toAddTeam">创建队伍</van-button>
     <TeamCardList :teamList="teamList"/>
+    <van-button class="add-button" icon="plus" type="primary" @click="toAddTeam"/>
     <van-empty v-if="teamList?.length < 1" description="数据为空"/>
   </div>
 </template>

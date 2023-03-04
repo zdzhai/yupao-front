@@ -1,5 +1,5 @@
 <template>
-  <div id="teamAddPage">
+  <div id="teamUpdatePage">
     <van-form @submit="onSubmit">
       <van-cell-group inset>
         <van-field
@@ -37,13 +37,20 @@
         <van-field
             v-model="addTeamData.expireTime"
             is-link
-            readonly
-            name="calendar"
+            readonlys
+            name="datePicker"
             label="过期时间"
-            placeholder="点击选择日期"
-            @click="showCalendar = true"
+            placeholder="点击选择时间"
+            @click="showPicker = true"
         />
-        <van-calendar v-model:show="showCalendar" @confirm="onConfirm" />
+        <van-popup v-show="showPicker" position="bottom">
+          <van-date-picker
+              @confirm="onConfirm"
+              @cancel="showPicker = false"
+              :min-date="minDate"
+              title="请选择时间"/>
+          <!--          <van-calendar v-model:show="showPicker" @confirm="onConfirm" />-->
+        </van-popup>
       </van-cell-group>
       <div style="margin: 16px;">
         <van-button round block type="primary" native-type="submit">
@@ -51,34 +58,32 @@
         </van-button>
       </div>
     </van-form>
-  </div>>
+  </div>
 
 </template>
 
 <script setup>
-import {useRouter} from "vue-router";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import {onMounted, ref} from 'vue';
 import myAxios from "../plugins/myAxios.js";
-import {Toast} from "vant";
 
 const router = useRouter();
 const route = useRoute();
-
+const minDate = new Date();
 const initFormData = {
   "name": "",
   "description": "",
-  "expireTime": new Date(2024, 1, 1).getTime(),
+  "expireTime": '',
   "maxNum": 3,
   "password": "",
   "status": 0
 }
 const addTeamData = ref({...initFormData});
-const result = ref('');
-const showCalendar = ref(false);
-const onConfirm = (date) => {
-  result.value = `${date.getMonth() + 1}/${date.getDate()}`;
-  showCalendar.value = false;
+const showPicker = ref(false);
+
+const onConfirm = ({ selectedValues }) => {
+  addTeamData.value.expireTime = selectedValues.join('-');
+  showPicker.value = false;
 }
 /**
  * 前端页面之间传递参数
@@ -96,8 +101,13 @@ onMounted(async () =>{
   });
   if (res.data?.code === 0){
     addTeamData.value = res.data.data;
+    const d = new Date(addTeamData.value.expireTime);
+    const times = d.getFullYear() + '-' + (d.getMonth() + 1) + '-'
+        + d.getDate() + ' ' + d.getHours() + ':'
+        + d.getMinutes() + ':' + d.getSeconds();
+    addTeamData.value.expireTime = times;
   } else {
-    console.log("队伍加载失败，请刷新重试！")
+    console.log("队伍信息失败，请刷新重试！")
   }
 });
 const onSubmit = async () => {

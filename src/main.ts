@@ -8,11 +8,13 @@ import {
     CellGroup,
     Col,
     DatePicker,
+    Dialog,
     Divider,
     Empty,
     Field,
     Form,
     Icon,
+    Image as VanImage,
     NavBar,
     Radio,
     RadioGroup,
@@ -21,14 +23,17 @@ import {
     Skeleton,
     Stepper,
     Switch,
+    Tab,
     Tabbar,
     TabbarItem,
+    Tabs,
     Tag,
     Toast,
     TreeSelect
 } from 'vant';
 import routes from "./config/route";
 import * as VueRouter from 'vue-router';
+import '../global.css';
 
 const app = createApp(App);
 app.use(Button);
@@ -56,6 +61,10 @@ app.use(DatePicker);
 app.use(Calendar);
 app.use(Switch);
 app.use(Skeleton);
+app.use(Tab);
+app.use(Tabs);
+app.use(Dialog);
+app.use(VanImage);
 // 3. 创建路由实例并传递 `routes` 配置
 // 你可以在这里输入更多的配置，但我们在这里
 // 暂时保持简单

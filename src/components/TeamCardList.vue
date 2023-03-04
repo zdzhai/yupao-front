@@ -25,12 +25,21 @@
       </template>
       <template #footer>
         <van-button type="primary" plain size="small" v-if="team.userId !== currentUser?.id && !team.hasJoin"
-                    @click="doJoinTeam(team.id)">
+                    @click="preJoinTeam(team)">
           加入队伍</van-button>
-        <van-button v-if="team.userId === currentUser?.id" plain size="small" @click="doUpdateTeam(team.id)">更新队伍</van-button>
+        <van-button v-if="team.userId === currentUser?.id" plain size="small"
+                    @click="doUpdateTeam(team.id)">
+          更新队伍</van-button>
         <van-button  plain size="small" v-if="team.userId !== currentUser?.id && team.hasJoin"
-                     @click="doQuitTeam(team.id)">退出队伍</van-button>
-        <van-button v-if="team.userId === currentUser?.id" plain size="small" @click="doDeleteTeam(team.id)">解散队伍</van-button>
+                     @click="doQuitTeam(team.id)">
+          退出队伍</van-button>
+        <van-button v-if="team.userId === currentUser?.id" plain size="small"
+                    @click="doDeleteTeam(team.id)">
+          解散队伍</van-button>
+        <van-dialog v-model:show="showPasswordDialog" title="请输入密码" show-cancel-button
+                    @confirm="doJoinTeam" @cancel="doJoinCancel">
+          <van-field v-model="password" placeholder="请输入密码"/>
+        </van-dialog>
       </template>
     </van-card>
   </div>
@@ -41,35 +50,17 @@ import {TeamType} from "../moduls/team";
 import {teamStatusEnum} from "../constants/teamEnum";
 import png from '../assets/vue.svg';
 import myAxios from "../plugins/myAxios.js";
-import {useRouter} from "vue-router";
-import {useRoute} from "vue-router";
-import {onMounted, ref} from "vue";
+import {useRoute, useRouter} from "vue-router";
+import {inject, onMounted, ref} from "vue";
 import {getCurrentUser} from "../services/user";
 
 const router = useRouter();
 const route = useRoute();
-
 interface TeamCardListProps{
   teamList : TeamType[];
 }
 //props能拿到父组件传递过来的属性
 const props =  defineProps<TeamCardListProps>()
-
-const doJoinTeam = async (id: number) => {
-  const res = await myAxios.post('/team/join',{
-    teamId: id
-  })
-      .then(function (response) {
-        console.log('/team/list success');
-        return response?.data;
-      })
-      .catch(function (error) {
-        console.log('/team/list fail', error);
-      })
-  if (res.data == 0) {
-    console.log(res);
-  }
-}
 
 const currentUser = ref({})
 /*
@@ -124,6 +115,50 @@ const doDeleteTeam = async (id: number) => {
   } else {
     console.log('操作失败' + (res.description ? `，${res.description}`:''));
 
+  }
+}
+
+let showPasswordDialog = ref(false);
+const password = ref('');
+const joinTeamId = ref(0);
+/**
+ * 点击确定向后台发请求加入队伍
+ * @returns {Promise<void>}
+ */
+const doJoinTeam = async () => {
+  if (!joinTeamId.value){
+    return;
+  }
+  const res = await myAxios.post('/team/join',{
+    password: password.value,
+    teamId: joinTeamId.value,
+  });
+  if (res.data?.code === 0){
+    console.log('加入成功');
+    doJoinCancel();
+  } else {
+    console.log('加入失败'+ (res.data?.description ? `,${res.data.description}` : ''));
+    doJoinCancel();
+  }
+}
+/**
+ * 取消时清空输入框和队伍Id
+ */
+const doJoinCancel = () => {
+  joinTeamId.value = 0;
+  password.value = '';
+}
+
+/**
+ * 判断是不是解密房间，是的话弹出密码输入框
+ * @param team
+ */
+const preJoinTeam = (team : TeamType) => {
+  joinTeamId.value = team.id;
+  if (team.status === 0){
+    doJoinTeam();
+  } else {
+    showPasswordDialog.value = true;
   }
 }
 </script>

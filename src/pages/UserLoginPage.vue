@@ -30,8 +30,9 @@
 import { ref } from 'vue';
 import myAxios from "../plugins/myAxios.js";
 import {Toast} from "vant";
-import {useRouter} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 
+const route = useRoute();
 const router = useRouter();
 
 const userAccount = ref('');
@@ -42,11 +43,12 @@ const userAccount = ref('');
       userAccount:userAccount.value,
       userPassword:userPassword.value,
     })
-    if (res.data.code === 0) {
+    if (res.data.code === 0 && res.data.data != null) {
       // Toast.success("登录成功");
-      router.replace('/');
+      const redirectUrl =  route.query?.redirect ?? '/'
+      window.location.href = redirectUrl;
     } else {
-      Toast.fail("登录失败");
+      console.log("登录失败");
     }
   };
 

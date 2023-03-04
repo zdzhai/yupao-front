@@ -56,11 +56,6 @@ const loadDate = async () => {
         pageNum: 1,
         pageSize: 8,
       },
-      //序列化参数
-      // paramsSerializer: (params: any) => {
-      //   return qs.stringify(params, { indices: false })
-      // },
-      //axios版本升级导致，0.x升级为1.x
     })
         .then(function (response) {
           console.log('/user/recommend success');
